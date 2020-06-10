@@ -5,6 +5,14 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
 import router from './router'
+import axios from 'axios'
+import config from '../config/sysConfig'
+
+// // 统一设置请求路径
+ axios.defaults.baseURL = config.manageUrl
+// // 挂载到 vue 的原型中
+ Vue.prototype.$http = axios
+Vue.use(axios)
 
 Vue.config.productionTip = false
 
