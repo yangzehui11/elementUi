@@ -7,16 +7,32 @@
       </el-col>
     </el-row>
     <el-table :data="list">
-      <el-table-column prop="tid" label="id" width="140">
+      <el-table-column prop="id" label="id" width="140">
       </el-table-column>
-      <el-table-column prop="tname" label="姓名" width="120">
+      <el-table-column prop="avatar" label="头像" width="120">
+      </el-table-column>
+      <el-table-column prop="nickname" label="姓名" width="120">
+      </el-table-column>
+      <el-table-column prop="createTime" label="创建时间" width="120">
       </el-table-column>
       <el-table-column label="操作" width="120">
         <el-button  type="primary" icon="el-icon-edit" circle></el-button>
         <el-button @click="delTeacher(tid)" type="danger" icon="el-icon-delete" circle></el-button>
       </el-table-column>
-
     </el-table>
+    <!-- 分页组件 -->
+    <!--
+                                      el-pagination:
+                                        size-change事件：当页容量改变时会执行
+                                        current-change事件：当当前页发生改变时执行
+                                        current-page：当前页
+                                        page-sizes: 页容量选项集合
+                                        page-size：选中的页容量
+                                        layout: 组件的布局
+                                        total：数据的总条数
+                                     -->
+    <el-pagination @current-change="currentchange" :current-page="findPage.page" :page-size="findPage.rows" layout="total, sizes, prev, pager, next, jumper" :total="total">
+    </el-pagination>
 
     <el-dialog title="添加教师" :visible.sync="addDialog">
       <el-form :model="addObj">
@@ -61,20 +77,34 @@
           state: 0,
           avatar: '',
         },
+        //分页查询数据
+        findPage: {
+          id:'',//A:findById,B:findByNickname
+          value:'',//值
+          page:1,//第几页
+          rows:3,//每页条数
+        }
       }
     },
     methods: {
       //查询
-      query:function () {
-        fetch(sysConfig.manageUrl+ '/m_teacher/findAllTeacher').then(response => {
-          return response.json()
-        }).then((data)=>{
-          this.list = data
+      async query() {
+        const res = await this.$http.request({
+          url: '/m_teacher/findPage',
+          method: 'post',
+          data: {
+            id:this.findPage.id,//A:findById,B:findByNickname
+            value:this.findPage.value,//值
+            page:this.findPage.page,//第几页
+            rows:this.findPage.rows,//每页条数
+          },
         })
+        this.list=res.data.page
+
       },
       //删除
       del:function (id) {
-        fetch(sysConfig.manageUrl+ '/m_teacher/delete/'+id).then(response => {
+        fetch(sysConfig.manageUrl+ '/m_teacher/delete/'+id, {credentials: 'include'}).then(response => {
            return response.json()
         }).then((data)=>{
           this.query()
@@ -82,53 +112,39 @@
       },
       // 新增
       async add() {
-        let options = {
-          method: 'POST',//post请求
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({//post请求参数
+        const res = await this.$http.request({
+          url: '/m_teacher/create',
+          method: 'post',
+          data: {
             nickname: this.addObj.nickname,
             info: this.addObj.info,
             password: this.addObj.password,
             role: this.addObj.role,
             state: this.addObj.state,
             avatar: this.addObj.avatar,
-          })
-        }
-        fetch(sysConfig.manageUrl+ '/m_teacher/create',options).then(response => {
-          return response.json()
-        }).then((data)=>{
-          this.query()
-        })
-        var res = await this.$http.request({
-          url: '/users',
-          method: 'post',
-          data: {
-            username: this.addObj.username,
-            password: this.addObj.password,
-            email: this.addObj.email,
-            mobile: this.addObj.mobile
           },
-          headers: {
-            "Authorization": window.localStorage.getItem('token')
-          }
         })
-        var { meta } = res.data
-        if (meta.status === 201) {
-          this.$message({
-            message: meta.msg,
-            type: 'success'
-          })
-          // 重新获取数据
-          this.getAllList()
+        if(res.data.success){
+          this.query()
         } else {
-          this.$message.error(meta.msg)
+          this.$message.error(res.data.message)
         }
         // 清除面板中的数据
         this.clearObj(this.addObj)
         this.addDialog = false
+      },
+      // 清空对象
+      clearObj(obj) {
+        for (var item in obj) {
+          obj[item] = ''
+        }
+      },
+      // 当当前页发生改变时，重新请求数据
+      currentchange(num) {
+        // 将 num 设置 pagenum
+        this.findPage.page = num
+        // 重新请求数据
+        this.query()
       },
     },
     create(){
