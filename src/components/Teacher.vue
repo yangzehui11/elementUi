@@ -13,7 +13,7 @@
       </el-table-column>
       <el-table-column prop="nickname" label="姓名" width="120">
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" width="120">
+      <el-table-column prop="createTime" label="创建" width="120">
       </el-table-column>
       <el-table-column label="操作" width="120">
         <el-button  type="primary" icon="el-icon-edit" circle></el-button>
@@ -87,6 +87,10 @@
       }
     },
     methods: {
+      //vuex
+      test() {
+        this.$store.commit('increment')
+      },
       //查询
       async query() {
         const res = await this.$http.request({

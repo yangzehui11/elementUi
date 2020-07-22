@@ -6,6 +6,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
 import router from './router'
 import axios from 'axios'
+import vuex from 'vuex'
 import config from '../config/sysConfig'
 axios.defaults.withCredentials=true //让ajax携带cookie
 // // 统一设置请求路径
@@ -13,14 +14,28 @@ axios.defaults.withCredentials=true //让ajax携带cookie
 // // 挂载到 vue 的原型中
  Vue.prototype.$http = axios
 Vue.use(axios)
+Vue.use(Vuex)
 
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 Vue.use(ElementUI)
+
+new Vuex.Store({
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment (state) {
+      state.count++
+    }
+  }
+})
+
 new Vue({
   el: '#app',
   router,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  store:store,
 })
