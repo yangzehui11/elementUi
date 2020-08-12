@@ -1,4 +1,5 @@
 <template>
+
   <el-main>
     <el-row class="myrow">
       <el-col :span="24">
@@ -86,6 +87,10 @@
       }
     },
     methods: {
+      //vuex
+      test() {
+        this.$store.commit('increment')
+      },
       //查询
       async query() {
         const res = await this.$http.request({
