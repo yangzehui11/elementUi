@@ -1,6 +1,5 @@
 <template>
 
-
   <el-main>
     <el-row class="myrow">
       <el-col :span="24">
